@@ -371,6 +371,7 @@ class Cribbage():
     def __init__(self,players):
         self.players = players # List of 'Cribbage_Player' classes
         self.deck = Deck() # Deck class
+        self.is_winner = False
         
     def start_game(self):
         print(f'Cribbage Game starts with {len(self.players)} players. Their names are:')
@@ -386,9 +387,15 @@ class Cribbage():
         print('\n')
         print('Let the game begin!')
         
-    def play_round(self):
+    def play_hand(self,player):
         
-        
+        # Start player's turn
+        print(f'------- {player.name}\'s turn -------')
+        player.calc_score(self.deck) # 
+        player.discard_hand(self.deck)
+        player.declare_score()
+    
+    def play_round(self,score_target):
         
         
         self.deck.deal(self.players,4)
@@ -396,10 +403,11 @@ class Cribbage():
         
         # Count up each players score
         for player in self.players:
-            print(f'------- {player.name}\'s turn -------')
-            player.calc_score(self.deck)
-            player.discard_hand(self.deck)
-            player.declare_score()
+            Cribbage.play_hand(self,player)
+            if player.score >= score_target:
+                return
+            else:
+                continue
         
         # Return turn_up card
         print('\n')
@@ -435,7 +443,7 @@ class Cribbage():
             print(f'--------------- Round {rnd} ----------------')
             print('\n')
             
-            Cribbage.play_round(self)
+            Cribbage.play_round(self,score_target)
             Cribbage.record_ranks(self)
             rnd +=1
             
