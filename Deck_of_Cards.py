@@ -102,8 +102,9 @@ class Deck:
             quotient = len(self.cards) // len(players)
             remainder = len(self.cards) % len(players)
             
-            for player in players:
-                player.draw_hand(self,draw_size=quotient)
+            for i in range(0,quotient):
+                for player in players:
+                    player.draw_hand(self)
             
             for i in range(0,remainder):
                 players[i].draw_hand(self)
@@ -113,10 +114,11 @@ class Deck:
             if len(self.cards) < len(players)*cards_per_player:
                 print(f'There are not enough cards in the deck to deal {cards_per_player} cards to {len(players)} players ')
                 sys.exit()
-                    
             
-            for player in players:
-                player.draw_hand(self,draw_size=cards_per_player)
+            # Important to deal one card at a time - espeically for games that don't shuffle between rounds like cribbage
+            for i in range(0,cards_per_player):
+                for player in players:
+                    player.draw_hand(self)
         
         print('Cards are dealt')
         
@@ -145,6 +147,7 @@ class Player:
         self.wins = 0 # For keeping track num of wins
         self.rank = 1
         self.rank_hist = []
+        self.position = None
         
     def draw_hand(self,deck,draw_size=1):
         
