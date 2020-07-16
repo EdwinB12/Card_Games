@@ -388,21 +388,30 @@ class Cribbage():
         
     def play_round(self):
         
+        
+        
+        
         self.deck.deal(self.players,4)
         self.deck.turn_up()
         
         # Count up each players score
         for player in self.players:
+            print(f'------- {player.name}\'s turn -------')
             player.calc_score(self.deck)
             player.discard_hand(self.deck)
             player.declare_score()
         
         # Return turn_up card
+        print('\n')
         self.deck.return_turn_up()
         
         if len(self.deck.cards) !=52:
             print(f'STOP! The deck has {len(self.deck.cards)} cards!')
             sys.exit()
+        
+        # Bring last member of list to the front for next round
+        popped = self.players.pop(0)
+        self.players.append(popped)
             
     def record_ranks(self):
         
@@ -419,7 +428,6 @@ class Cribbage():
     def play_game(self,score_target):
         
         rnd = 1
-        
         # Loop until a player reaches the target score
         while all(player.score < score_target for player in self.players):
             
