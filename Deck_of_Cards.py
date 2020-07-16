@@ -359,6 +359,10 @@ class Cribbage_Player(Player):
             card.show()
         self.max_hand_turn_up.show()
 
+
+
+# -------------------------- Cribbage Game Class ------------------------------
+
 class Cribbage():
     
     def __init__(self,players):
@@ -427,7 +431,8 @@ class Cribbage():
         winning_player = self.players[np.argmax([player.score for player in self.players])]
         print('\n')
         print(f'{winning_player.name} is the winner with a score of {winning_player.score}!')
-        
+        print('\n')
+   
     def game_plots(self,line_colors):
         
         # Loop through players and supplied line
@@ -457,16 +462,145 @@ class Cribbage():
     
     def print_stats(self):
         pass
+
+
+# -------------------------- Snap Game Class ------------------------------
+
+class Snap():
+    
+    def __init__(self,players):
         
-#  ---------- Game of Cribbage -----------------
+        self.players_orig = players.copy() # This is the list of the starting players and is used for plots post game
+        self.players = players # List of 'Snap_Player' classes. This will be edited throughout the game
+        self.deck = Deck() # Deck class - This deck is where the cards are dealth from
+        self.play_deck = Deck() # This deck acts as the table. This is where cards are played down
+    
+    def start_game(self):
+        print(f'Snap Game starts with {len(self.players)} players. Their names are:')
+        for player in self.players:
+            print(player.name)
+        
+        print('\n')
+       
+        # Buld, shuffle deck
+        self.deck.build()
+        self.deck.shuffle()
+        self.deck.deal(self.players,'max')
+        
+        print('\n')
+        print('Let the game begin!')
+        print('\n')
+        
+        
+    def play_game(self):
+        
+        self.deck.deal(self.players,'max') # Deal cards
+        
+        # Initliase counts
+        deck_cnt=0
+        card_cnt = 0
+        
+     # Loop whilst there are more than 1 player
+        while len(self.players) > 1:
+            
+            # Loop through the list of players
+            for index,player in enumerate(self.players):
+                
+                player.record_hand_count() # records hand size for post game plots
+                
+                # Check if any player has no cards left. If not, then dlecare defeat and remove from player list
+                if player.declare_defeat():
+                    self.players.pop(index)
+                    continue
+                
+                # Play card onto playing deck (table)
+                player.play_card(self.play_deck)
+                card_cnt+=1
+                
+                # If it is first card to be played, then it can't be snap so don't check for snap
+                if deck_cnt ==0:
+                    deck_cnt+=1
+                    
+                else:
+                    # Chec if current card matches previous card
+                    if self.play_deck.cards[deck_cnt].num == self.play_deck.cards[deck_cnt-1].num:
+                        
+                        # Calculate random winner of snap
+                        self.players[random.randint(0,len(self.players)-1)].snap = True
+                        deck_cnt=0
+                        
+                        # Loops through players to declare snap (random num has already chosen who will win, rest of logic is handled in the class)
+                        for player in self.players:
+                            player.declare_snap(self.play_deck)
+                    
+                    # If no snap, then continue
+                    else:
+                        deck_cnt+=1
+            
+        # Record player win incase multiple games are played
+        self.players[0].record_win()
+                
+        #---------------------- Game Finished -------------------------------
+        
+        print(f'The winner is {self.players[0].name} with {len(self.players[0].hand)} cards left!')
+        print(f'Total number of cards played was {card_cnt}')   
+        
+    def plot_hand_count_hist(self,line_colors):
+        
+        # Plot win history if multiple games have been played
+        fig,ax = plt.subplots(figsize=(6,6))
+        for player,line_color in zip(self.players_orig,line_colors):
+            ax.plot(range(0,len(player.hc_lst)),player.hc_lst,line_color,label=player.name)        
+            
+        ax.legend()
+        ax.set_xlabel('Turns')
+        ax.set_ylabel('Cards in hand')
+        
+    def plot_win_hist(self):
+        
+        # Plot win history if multiple games have been played
+        fig,ax = plt.subplots(figsize=(6,6))
+        for player in self.players_orig:
+            ax.scatter(player.name,player.wins)
+            
+        ax.set_xlabel('Players')
+        ax.set_ylabel('Wins')
+        
+        
+        
+#%%  ---------- Game of Snap -----------------  
+     
+# Initilise players and Deck
+play_1 = Snap_Player('Player 1')
+play_2 = Snap_Player('Player 2')
+play_3 = Snap_Player('Player 3')
+play_4 = Snap_Player('Player 4')
+play_5 = Snap_Player('Player 5')
+players = [play_1,play_2,play_3,play_4,play_5]
+
+# Initialise Game
+snap_game = Snap(players)
+
+# Start and play Snap Game
+snap_game.start_game()
+snap_game.play_game()
+
+# Plot histories of hand count and wins
+snap_game.plot_hand_count_hist(['b-','g-','y-','r-','k-'])
+snap_game.plot_win_hist()
+
+
+#%%  ---------- Game of Cribbage -----------------
 
 # Initialise Players
 crib_1 = Cribbage_Player('Dad')
 crib_2 = Cribbage_Player('Mum')
-crib_3 = Cribbage_Player('Edwin')  
+crib_3 = Cribbage_Player('Edwin') 
+crib_4 = Cribbage_Player('Frances')
+crib_5 = Cribbage_Player('Esther') 
 
 # Initlaise game class 
-Crib = Cribbage([crib_1,crib_2,crib_3])
+Crib = Cribbage([crib_1,crib_2,crib_3,crib_4,crib_5])
 
 # Start Game
 Crib.start_game() 
@@ -475,188 +609,7 @@ Crib.start_game()
 Crib.play_game(50)
 
 # Plot how score and position change throughout the game
-Crib.game_plots(['b-','g-','y-'])
+Crib.game_plots(['b-','g-','y-','r-','k-'])
 
+# Reveal scoring hands 
 Crib.max_scoring_hands()
-
-
-
-
-
-#%% ------------------------- Game of SNAP ---------------------------
-
-# Initilise players and Deck
-play_1 = Snap_Player('Player 1')
-play_2 = Snap_Player('Player 2')
-play_3 = Snap_Player('Player 3')
-play_4 = Snap_Player('Player 4')
-play_5 = Snap_Player('Player 5')
-players = [play_1,play_2,play_3,play_4,play_5]
-players_orig = players.copy()
-deck = Deck()
-
-# Build deck and deal
-deck.build()
-deck.shuffle()
-deck.deal(players,'max')
-
-# Count cards in hand
-for player in players:
-    player.count_hand()
- 
-# Players play cards until SNAP
-print('\n')
-print('-------GAME STARTS--------------')
-print('\n')
-
-play_deck = Deck() # This is where the cards are put down
-
-# Initliase counts
-deck_cnt=0
-card_cnt = 0
-
-# ------------------- Play Game ----------------------------
-
-# Loop whilst there are more than 1 player
-while len(players) > 1:
-    
-    # Continously loop through the list of players
-    for index,player in enumerate(players):
-        
-        player.record_hand_count() # Documents hand size
-        
-        # Check if player has no cards left. If not, then dlecare defeat and remove from player list
-        if player.declare_defeat():
-            players.pop(index)
-            continue
-        
-        # Play card onto playing deck (table)
-        player.play_card(play_deck)
-        card_cnt+=1
-        
-        # If it is first card to be played, then it can't be snap so don't check for snap
-        if deck_cnt ==0:
-            deck_cnt+=1
-            
-        else:
-            # Chec if current card matches previous card
-            if play_deck.cards[deck_cnt].num == play_deck.cards[deck_cnt-1].num:
-                
-                # Calculate random winner of snap
-                players[random.randint(0,len(players)-1)].snap = True
-                deck_cnt=0
-                
-                # Loops through players to declare snap (random num has already chosen who will win, rest of logic is handled in the class)
-                for player in players:
-                    player.declare_snap(play_deck)
-            
-            # If no snap, then continue
-            else:
-                deck_cnt+=1
-                
-#---------------------- Game Finished -------------------------------
-
-print(f'The winner is {players[0].name} with {len(players[0].hand)} cards left!')
-print(f'Total number of cards played was {card_cnt}')
-
-# Plot graph of hand size progress for all players in game
-def hc_plot(ax,player,marker):
-    ax.plot(range(0,len(player.hc_lst)),player.hc_lst,marker,label=player.name)
-
-fig,ax = plt.subplots(figsize=(6,6))
-marker_list = ['b-','g-','y-','r-','k-']
-for player,marker in zip(players_orig,marker_list):
-    hc_plot(ax,player,marker)
-ax.legend()
-ax.set_xlabel('Turns')
-ax.set_ylabel('Cards in hand')
-
-#%% Play 100 Games
-
-# Initilise players and Deck
-play_1 = Snap_Player('Player 1')
-play_2 = Snap_Player('Player 2')
-play_3 = Snap_Player('Player 3')
-play_4 = Snap_Player('Player 4')
-play_5 = Snap_Player('Player 5')
-players = [play_1,play_2,play_3,play_4,play_5]
-players_orig = players.copy()
-
-
-
-for i in range(0,100):
-    
-    players = [play_1,play_2,play_3,play_4,play_5]
-    
-    # Build deck and deal
-    deck = Deck()
-    deck.build()
-    deck.shuffle()
-    deck.deal(players,'max')
-    
-    
-    
-    play_deck = Deck() # This is where the cards are put down
-    
-    # Initliase counts
-    deck_cnt=0
-    card_cnt = 0
-    
-    # ------------------- Play Game ----------------------------
-    
-    # Loop whilst there are more than 1 player
-    while len(players) > 1:
-        
-        # Continously loop through the list of players
-        for index,player in enumerate(players):
-            
-            player.record_hand_count() # Documents hand size
-            
-            # Check if player has no cards left. If not, then dlecare defeat and remove from player list
-            if player.declare_defeat():
-                players.pop(index)
-                continue
-            
-            # Play card onto playing deck (table)
-            player.play_card(play_deck)
-            card_cnt+=1
-            
-            # If it is first card to be played, then it can't be snap so don't check for snap
-            if deck_cnt ==0:
-                deck_cnt+=1
-                
-            else:
-                # Chec if current card matches previous card
-                if play_deck.cards[deck_cnt].num == play_deck.cards[deck_cnt-1].num:
-                    
-                    # Calculate random winner of snap
-                    players[random.randint(0,len(players)-1)].snap = True
-                    deck_cnt=0
-                    
-                    # Loops through players to declare snap (random num has already chosen who will win, rest of logic is handled in the class)
-                    for player in players:
-                        player.declare_snap(play_deck)
-                
-                # If no snap, then continue
-                else:
-                    deck_cnt+=1
-
-    players[0].record_win()
-
-
-
-
-# Plot graph of hand size progress for all players in game
-def win_plot(ax,player):
-    ax.scatter(player.name,player.wins)
-
-fig,ax = plt.subplots(figsize=(6,6))
-#marker_list = ['b-','g-','y-','r-','k-']
-for player in players_orig:
-    win_plot(ax,player)
-ax.set_xlabel('Players')
-ax.set_ylabel('Wins')
-
-
-
-
