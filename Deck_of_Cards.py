@@ -143,8 +143,8 @@ class Player:
         self.name=name
         self.hc_lst = [] # For keeping track of hand size throughout a game
         self.wins = 0 # For keeping track num of wins
-        self.position = 1
-        self.position_hist = []
+        self.rank = 1
+        self.rank_hist = []
         
     def draw_hand(self,deck,draw_size=1):
         
@@ -190,8 +190,8 @@ class Player:
     def record_win(self):
          self.wins+=1
     
-    def record_position(self):
-        self.position_hist.append(self.position)
+    def update_rank(self):
+        self.rank_hist.append(self.rank)
  
 
 # -------------------------- Snap Player Class ------------------------------
@@ -387,6 +387,7 @@ class Cribbage():
         
         self.deck.deal(self.players,4)
         self.deck.turn_up()
+        
         # Count up each players score
         for player in self.players:
             player.calc_score(self.deck)
@@ -400,16 +401,16 @@ class Cribbage():
             print(f'STOP! The deck has {len(self.deck.cards)} cards!')
             sys.exit()
             
-    def record_positions(self):
+    def record_ranks(self):
         
-        # Create a list of positions 
+        # Create a list of ranks 
         scores = np.array([player.score for player in self.players])
-        positions = ss.rankdata(-scores,'min')
+        ranks = ss.rankdata(-scores,'min')
         
-        # Update player position
-        for (player,pos) in zip(self.players,positions):
-            player.position = pos
-            player.record_position()
+        # Update player rank
+        for (player,rank) in zip(self.players,ranks):
+            player.rank = rank
+            player.update_rank()
             
             
     def play_game(self,score_target):
@@ -424,7 +425,7 @@ class Cribbage():
             print('\n')
             
             Cribbage.play_round(self)
-            Cribbage.record_positions(self)
+            Cribbage.record_ranks(self)
             rnd +=1
             
         # Announce Winner 
@@ -442,15 +443,15 @@ class Cribbage():
             # Plot score history
             ax1.plot(range(1,len(player.score_hist)+1),player.score_hist,line_color,label=player.name)
             
-            # Plot position history
-            ax2.plot(range(1,len(player.position_hist)+1),player.position_hist,line_color,label=player.name)
+            # Plot rank history
+            ax2.plot(range(1,len(player.rank_hist)+1),player.rank_hist,line_color,label=player.name)
             ax2.invert_yaxis()
         
         ax1.legend()
         ax1.set_xlabel('Rounds')
         ax1.set_ylabel('Score')
         ax2.set_xlabel('Rounds')
-        ax2.set_ylabel('Position')
+        ax2.set_ylabel('Ranks')
         
     def max_scoring_hands(self):
         
@@ -608,7 +609,7 @@ Crib.start_game()
 # Play game until someone reaches 50 points
 Crib.play_game(50)
 
-# Plot how score and position change throughout the game
+# Plot how score and rank change throughout the game
 Crib.game_plots(['b-','g-','y-','r-','k-'])
 
 # Reveal scoring hands 
