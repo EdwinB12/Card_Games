@@ -7,11 +7,11 @@ Created on Sat Jul 18 11:23:33 2020
 
 import CardGameBasics as CBG
         
-p1 = CBG.Cribbage_Player('Esther')  
-p2 = CBG.Cribbage_Player('Edwin')  
-p3 = CBG.Cribbage_Player('Bethany')  
-p4 = CBG.Cribbage_Player('Sarah')
-p5 = CBG.Cribbage_Player('Glenda')
+p1 = CBG.Cribbage_Player('Player 1')  
+p2 = CBG.Cribbage_Player('Player 2')  
+p3 = CBG.Cribbage_Player('Player 3')  
+p4 = CBG.Cribbage_Player('Player 4')
+p5 = CBG.Cribbage_Player('Player 5')
 
 #players = [p1,p2]
 #players = [p1,p2,p3]
