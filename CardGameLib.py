@@ -16,13 +16,45 @@ import scipy.stats as ss
 
 
 class Card:
+
+    """
+    Class for representing a playing Card
     
-    '''
-    Class to represent a playing card.
-    
-    '''
+    Attributes
+    ----------
+    suit: str
+        Suit of the Card: 'Clubs', 'Hearts', 'Spades' or 'Diamonds'
+    num: int
+        Number represented by the card: Ace, Jack, Queen and King should be 1,11,12,13 respectively. 
+    val: int
+        Value represented by the card: Picture cards are usually 10 and Ace can be 1 or 11. Automatically set in the Class from the num attribute. 
+    face: int or str
+        Name of the card: 10 would be a 10 and a 11 would be 'Jack'. Automatically set in the Class from the num attribute. 
+    ace_high: Bool  Optional: Default = False
+        If True, then Ace is set to a value of 11 and a number of 14 rather than 1 for both. 
+        
+    Methods
+    -------
+    show()
+        Prints a string in the format '{face} of {suit}'
+    return_show()
+        Returns a string in the format '{face} of {suit}'
+        
+    """
     
     def __init__(self,suit,num,ace_high=False):
+        
+        """
+        
+        Parameters
+        ----------
+        suit: str
+            Suit of the Card: 'Clubs', 'Hearts', 'Spades' or 'Diamonds'
+        num: int
+            Number represented by the card: Ace, Jack, Queen and King should be 1,11,12,13 respectively.
+        ace_high: Bool  Optional: Default = False
+            If True, then Ace is set to a value of 11 and a number of 14 rather than 1 for both.
+        """
         
         self.suit = suit # Suit of Card
         self.num = int(num) # Number of card: Ace = 1, Jack = 11, Queen = 12, King = 13
@@ -31,6 +63,7 @@ class Card:
         # If Ace has value = 1 and user wants it to be high, make it worth 14
         if self.ace_high == True and self.num == 1: 
             self.num = 14
+            
         
         # --------------- Setting Card Values --------------------------
         
@@ -61,9 +94,30 @@ class Card:
     # ------------------ Methods for showing card ------------------------
     
     def show(self):
+        """
+        
+        Prints a string describing the card
+        
+        Prints
+        -------
+        String in the format '{face} of {suit}'
+
+        """
+        
         print (f"{self.face} of {self.suit}")
     
     def return_show(self):
+        """
+        
+        Return a string describing the card
+
+        Returns
+        -------
+        str
+            String in the format '{face} of {suit}'
+
+        """
+        
         return (f"{self.face} of {self.suit}")
 
 
