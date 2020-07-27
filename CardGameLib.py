@@ -3,6 +3,26 @@
 Created on Sun Jul 26 15:11:06 2020
 
 @author: edwin
+
+Module for playing games of Snap and Cribbage. 
+
+Classes 
+-------
+
+Card
+    Class represents a playing card
+Deck
+    Class representing a deck of cards
+Player
+    Class representing a basic card player
+Snap Player
+    Class specialised for players playing Snap. Inherits from Player Class
+Cribbage Player
+    Class specialised for players playing Cribbage. Inherits from Player Class
+Snap
+    Class governing game of Snap
+Cribbage
+    Class governing game of Cribbage
 """
 
 
