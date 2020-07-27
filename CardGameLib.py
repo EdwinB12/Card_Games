@@ -166,7 +166,7 @@ class Player:
        card_played =[]
        card_played = self.hand.pop(0)
        deck.cards.append(card_played)
-       card_played.show()
+       print(self.name, 'plays:', card_played.return_show())
     
     # ------------------------ Hand Action Methods ------------------------
 
