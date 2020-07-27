@@ -645,13 +645,19 @@ class Snap():
         self.play_deck = Deck() # This deck acts as the table. This is where cards are played down
     
     def start_game(self):
+        
+        self.players = self.players_orig.copy()
         print(f'Snap Game starts with {len(self.players)} players. Their names are:')
         for player in self.players:
             print(player.name)
-        
+            player.hand=[] # Reset players hands
+            player.hc_lst = []# Reset player hand count history
+            
         print('\n')
-       
+        
         # Buld, shuffle deck
+        self.deck = Deck() # Create new Deck and play deck. 
+        self.play_deck = Deck()
         self.deck.build()
         self.deck.shuffle()
         self.deck.deal(self.players,'max')
@@ -712,16 +718,17 @@ class Snap():
         print(f'The winner is {self.players[0].name} with {len(self.players[0].hand)} cards left!')
         print(f'Total number of cards played was {card_cnt}')   
         
-    def plot_hand_count_hist(self,line_colors):
+    def plot_hand_count_hist(self,line_colors,title=None):
         
         # Plot win history if multiple games have been played
         fig,ax = plt.subplots(figsize=(6,6))
         for player,line_color in zip(self.players_orig,line_colors):
             ax.plot(range(0,len(player.hc_lst)),player.hc_lst,line_color,label=player.name)        
             
-        ax.legend()
+        ax.legend(loc = 'upper left')
         ax.set_xlabel('Turns')
         ax.set_ylabel('Cards in hand')
+        ax.set_title(title)
         
     def plot_win_hist(self):
         
@@ -732,3 +739,4 @@ class Snap():
             
         ax.set_xlabel('Players')
         ax.set_ylabel('Wins')
+        ax.set_title('Win Record')
