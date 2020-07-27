@@ -223,7 +223,28 @@ class Cribbage_Player(Player):
         self.hand_score = 0 # Score for a single hand
         self.hand_score_hist = [] # History of the players hand scores
         self.game_score=0 # Overall Game Score
-        self.game_score_hist = [] #  History of overall game scores (Used when multiple games are played)
+        self.game_score_hist = [] #  History of overall game score
+        
+        self.max_hand = [] # Max scoring hand of the game
+        self.max_hand_score = 0 # Max score by a hand in the game 
+        self.max_hand_turn_up = [] # Do I Need this? 
+        
+        self.box_card = [] # This is the rejected card that will be sent to the box
+        self.box=[] # This is the box hand
+        self.box_score = 0
+        self.box_score_hist = [] # Box History
+        
+    def reset_attribs(self):
+        
+        self.hand = []
+        self.rank = 1 
+        self.rank_hist = [] 
+        
+       
+        self.hand_score = 0 # Score for a single hand
+        self.hand_score_hist = [] # History of the players hand scores
+        self.game_score=0 # Overall Game Score
+        self.game_score_hist= []
         
         self.max_hand = [] # Max scoring hand of the game
         self.max_hand_score = 0 # Max score by a hand in the game 
@@ -410,12 +431,14 @@ class Cribbage_Player(Player):
         # Find index corresponding to highest scoring hand and pick combination as hand
         best_index = np.argmax(hand_scores)
         self.hand = list(hand_combinations[best_index])
-        
-        # Find rejected card and 
-        rejected_card = list(set(dealt_hand) - set(self.hand.copy()))
-        self.box_card = rejected_card
-
     
+        # Find rejected card 
+        rejected_card = list(set(dealt_hand) - set(self.hand.copy()))
+        
+        self.box_card = rejected_card
+        
+ 
+   
 class Cribbage():
     
     def __init__(self,players):
@@ -448,12 +471,15 @@ class Cribbage():
             
         # List players
         print(f'Cribbage Game starts with {len(self.players)} players. Their names are:')
+        
         for player in self.players:
+            player.reset_attribs() # Reset all attributes 
             print(player.name)
         
         print('\n')
        
         # Buld and shuffle deck
+        self.deck = Deck() # Deck class
         self.deck.build()
         self.deck.shuffle()
        
@@ -466,6 +492,7 @@ class Cribbage():
         Play a game of Cribbage
         
         '''
+        
         # -------------------- Dealing -------------------------
         
         # Deal different number of cards depending on number of players
@@ -484,11 +511,6 @@ class Cribbage():
             # Deal 5 cards to each player
              self.deck.deal(self.players,5)
             
-        # Print which player has the box
-        print(f'{self.players[-1].name} has the box')
-        print('\n')
-        
-        
         # ----------------- Hand Choosing ----------------------------
         
         # Loop through the players and discard unwanted cards to last players box
@@ -496,10 +518,15 @@ class Cribbage():
             player.choose_hand(self.deck)
             self.players[-1].box.extend(player.box_card)
             player.box_card = []
+            print(f'{player.name} has chosen their hand')
+        
+        # Print which player has the box
+        print(f'{self.players[-1].name} has the box')
+        
         
         # Turn up card
         self.deck.turn_up()
-        
+        print('\n')
         
         # Check all hands and box have 4 cards before scoring
         num_of_cards_in_hands = [len(player.hand) for player in self.players]
@@ -584,6 +611,9 @@ class Cribbage():
         print('\n')
         print(f'{winning_player.name} is the winner with a score of {winning_player.game_score}!')
         print('\n')
+        
+        # Record Winning Player win
+        winning_player.update_win()
             
     def game_plots(self,line_colors):
         
@@ -604,7 +634,18 @@ class Cribbage():
         ax2.set_xlabel('Rounds')
         ax2.set_ylabel('Ranks')
         ax2.invert_yaxis()
+    
+    def plot_win_hist(self):
         
+        # Plot win history if multiple games have been played
+        fig,ax = plt.subplots(figsize=(6,6))
+        for player in self.players:
+            ax.scatter(player.name,player.wins)
+            
+        ax.set_xlabel('Players')
+        ax.set_ylabel('Wins')
+        ax.set_title('Win Record')
+    
         
 class Snap_Player(Player):
     
