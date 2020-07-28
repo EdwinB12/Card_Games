@@ -442,7 +442,61 @@ class Player:
 
 class Cribbage_Player(Player):
     
+    """
+    Class specialised for players playing Cribbage. Inherits from Player Class
+    
+    Attributes
+    ----------
+    hand_score: int
+        Score the player gets for their current hand
+    hand_score_hist: List
+        History of hand_scores for each round
+    game_score: int
+        Total score accumulated throughout the game
+    game_score_hist: List
+        History of Game scores (only important if multiple games are played). 
+    max_hand: List of card objects
+        Players max scoring hand of the game
+    max_hand_score: int
+        The score the max_hand earned
+    box_card: Card(s) Object
+        Rejected card(s) from hand to be sent to the box
+    box: List of Cards
+        Box for the round. Only one player in the game will have a box so often this will be an empty list
+    box_score: int
+        Score the box earns
+    box_score_hist: List of int
+        History of the box score throughout the game
+        
+    Methods
+    -------
+    reset_attribs:
+        Resets specific attributes back to initial values
+    calc_score:
+        Calculates the score earned by a hand or box
+    update_game_score:
+        Adds hand_score to game_score
+    update_max_hand:
+        Check if current hand is the max scoring hand of the game so far and if true, save hand to max hand
+    update_hand_score:
+        Passes given score to players hand_score
+    record_box_score:
+        Add box_score to box_score_hist
+    discard_box:
+        Discard box to user defined deck
+    choose_hand:
+        Chooses highest scoring 4 card combination from hand and sends rejected card(s) to box_card attribute. 
+        
+    """
+    
     def __init__(self,name):
+        
+        '''
+        Parameters
+        ----------
+        name: str
+            Player Name
+        '''
         
         # Inherit from Player Class
         super().__init__(name)
@@ -455,7 +509,6 @@ class Cribbage_Player(Player):
         
         self.max_hand = [] # Max scoring hand of the game
         self.max_hand_score = 0 # Max score by a hand in the game 
-        self.max_hand_turn_up = [] # Do I Need this? 
         
         self.box_card = [] # This is the rejected card that will be sent to the box
         self.box=[] # This is the box hand
@@ -464,11 +517,14 @@ class Cribbage_Player(Player):
         
     def reset_attribs(self):
         
+        '''
+        Resets specific attributes back to initial values
+        '''
+        
         self.hand = []
         self.rank = 1 
         self.rank_hist = [] 
         
-       
         self.hand_score = 0 # Score for a single hand
         self.hand_score_hist = [] # History of the players hand scores
         self.game_score=0 # Overall Game Score
@@ -485,8 +541,24 @@ class Cribbage_Player(Player):
         
     def calc_score(self,hand,deck,count_up):
         
-        # Calculate cribbage count up score from 5 cards where 4 cards have been drawn and 1 card is turned up
-        # 15's, straights, flushes, pairs and knobs are seperately calculated and added up for a total score. 
+        '''
+        Calculates the score earned by a hand or box. Calculate cribbage count up score from 5 cards where 4 cards have been drawn and 1 card is turned up
+        15's, straights, flushes, pairs and knobs are seperately calculated and added up for a total score.
+        
+        Parameters
+        ----------
+        hand: List of Card Objects
+            Can be either a players hand or a box
+        deck: Deck Object
+            Deck 
+        count_up: bool
+            If True, then the deck's turn_up_card is counted in the calculation of the score. If False, then turn_up_card is not included. Also points for Knobs is not counted.  '
+        
+        Return
+        -------
+        hand_score: int
+            Score for the hand
+        '''
         
         
         if count_up:
@@ -598,6 +670,16 @@ class Cribbage_Player(Player):
         return hand_score
     
     def update_game_score(self,save=True):
+        
+        '''
+        Adds hand_score to game_score. game_score is added to history if save=True
+        
+        Parameters
+        ----------
+        save: bool, Default: True
+            If True, game_score_hist is updated. If False, game_score is not passed to game_score_hist
+        '''
+        
         # Add hand Score to players score
         self.game_score += self.hand_score
         
@@ -608,6 +690,16 @@ class Cribbage_Player(Player):
             pass
         
     def update_max_hand(self,deck):
+        
+        '''
+        Check if current hand is the max scoring hand of the game so far and if true, save hand to max hand
+        
+        Parameters
+        ----------
+        deck: 
+            Deck being used
+        '''
+        
         # Check if current hand is best hand yet
         if self.hand_score > self.max_hand_score:
             self.max_hand_score = self.hand_score
@@ -617,6 +709,18 @@ class Cribbage_Player(Player):
             pass
     
     def update_hand_score(self,hand_score,save=True):
+        
+        '''
+        Passes given score to players hand_score
+        
+        Parameters
+        ----------
+        hand_score: int
+            Score for the hand
+        save: bool, default=True
+            if True, hand score is added to hand_score_hist. If False, it is not passed to hist. 
+        '''
+        
         self.hand_score = hand_score
         
         if save:
@@ -627,26 +731,42 @@ class Cribbage_Player(Player):
      
     def record_box_score(self):
         
+        '''
+        '''
+        
         self.box_score_hist.append(self.box_score)
         print(f'{self.name}s box score is {self.box_score}')
         
     def discard_box(self,deck=None):
+        
+        '''
+        Discard box to user defined deck
+        
+        Parameters
+        -----------
+        deck: Deck Object, Default is None
+            If None,then box is simply cleared. If box is specified, then box will be moved to the deck.
+        '''
          
-            if deck == None:
-                self.box=[]
-                print(f'{self.name} discards box')
+        if deck == None:
+            self.box=[]
+            print(f'{self.name} discards box')
             
-            else:
-                for card in self.box:
-                    deck.cards.append(card)
-                self.box=[]
-                print(f'{self.name} discards box to bottom of deck')
+        else:
+            for card in self.box:
+                deck.cards.append(card)
+            self.box=[]
+            print(f'{self.name} discards box to bottom of deck')
                 
         
     def choose_hand(self,deck):
         '''
         Choose the highest scoring combination of 4 cards out of 5 and
         discard the unwanted card to the box. 
+        
+        Parameters
+        deck: Deck Object
+            deck in use
         
         '''
         
