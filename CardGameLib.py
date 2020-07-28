@@ -296,15 +296,26 @@ class Deck:
 
 class Player:
     
+    """
+    Class representing a game player. This class provides the back-bone for more specialised player classes. 
+    
+    Attributes
+    ----------
+    hand: List of Card Objects
+        Cards currently in the players hand
+    name: Str
+        Player's Name
+    hc_hist
+    """
+    
     def __init__(self,name):
     
         self.hand=[] # List of Card Objects
         self.name=name # String name of the player
-        self.hc_lst = [] # For keeping track of hand size throughout a game
         self.wins = 0 # For keeping track num of wins
         self.rank = 1 # Rank - Used when playing a game
         self.rank_hist = [] # History of the rank
-    
+        
     # ------------------------ Card Action Methods ------------------------
     
     def play_card(self,deck):
@@ -348,8 +359,7 @@ class Player:
         return len(self.hand)
     # ------------------ Update record (different metrics) methods -------------------------
         
-    def update_hand_count(self):
-        self.hc_lst.append(len(self.hand))
+    
         
     def update_win(self):
          self.wins+=1
@@ -798,6 +808,11 @@ class Snap_Player(Player):
     def __init__(self,name):
         super().__init__(name)
         self.snap = False
+        self.hc_hist = [] # For keeping track of hand size throughout a game
+    
+    def update_hand_count(self):
+        self.hc_hist.append(len(self.hand))
+    
     
     # Methods for declaring Snap and Defeat
     
@@ -838,7 +853,7 @@ class Snap():
         for player in self.players:
             print(player.name)
             player.hand=[] # Reset players hands
-            player.hc_lst = []# Reset player hand count history
+            player.hc_hist = []# Reset player hand count history
             
         print('\n')
         
@@ -910,7 +925,7 @@ class Snap():
         # Plot win history if multiple games have been played
         fig,ax = plt.subplots(figsize=(6,6))
         for player,line_color in zip(self.players_orig,line_colors):
-            ax.plot(range(0,len(player.hc_lst)),player.hc_lst,line_color,label=player.name)        
+            ax.plot(range(0,len(player.hc_hist)),player.hc_hist,line_color,label=player.name)        
             
         ax.legend(loc = 'upper left')
         ax.set_xlabel('Turns')
