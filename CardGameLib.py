@@ -10,7 +10,7 @@ Classes
 -------
 
 Card
-    Class represents a playing card
+    Class representing a playing card
 Deck
     Class representing a deck of cards
 Player
@@ -55,9 +55,9 @@ class Card:
         
     Methods
     -------
-    show()
+    show
         Prints a string in the format '{face} of {suit}'
-    return_show()
+    return_show
         Returns a string in the format '{face} of {suit}'
         
     """
@@ -143,15 +143,48 @@ class Card:
 
 class Deck:
     
+    """
+    Class representing a standard deck of playing cards: 52 Cards, 4 suits etc. 
+    
+    Attributes
+    ----------
+    cards: list of card objects
+        Cards currently in the deck
+    turn_up_card: Card Object
+        Single turned up card from the deck.
+        
+    Methods
+    -------
+    build
+        Create a 52 card deck. Card objects are stored as a list in the 'cards' attribute
+    show
+        Prints a string in the format '{face} of {suit}' for each card in the deck
+    shuffle
+        Randomly orders the cards
+    draw
+        Returns card taken from the top of the deck
+    count
+        Prints a the number of cards in the deck: "The deck has {len(self.cards)} cards left"
+    deal
+        Deals cards to a given list of players. User can specify how many cards each player recieves or the deal the max number of cards, i.e. Keep dealing until deck runs out. 
+    turn_up
+        Takes top card from deck and moves to turn_up_card attribute
+    return_turn_up
+        Moves turn_up_card attribute to the bottom of the deck
+        
+    """
+    
     def __init__(self):
         
         self.cards = [] # List of Cards - To be populated by 'Card' class Objects
         self.turn_up_card = [] # Single turn up card - required for some games
         
         
-        
-        
     def build(self):
+        
+        """
+        Creates a 52 card deck. List of card objects found in 'cards' attribute. 
+        """
         
         # Loop Around Suits
         for suit in ['Clubs','Diamonds','Hearts', 'Spades']:
@@ -162,16 +195,29 @@ class Deck:
                 
     def show(self):
         
+        """
+        Prints a string in the format '{face} of {suit}' for each card in the deck.
+        
+        """
+        
         # Loop through list of cards
         for card in self.cards:
             card.show()
     
     def shuffle(self):
         
+        """
+        Randomly orders the cards
+        """
+        
         random.shuffle(self.cards)
         print('Deck shuffled')
         
     def draw(self,draw_size=1):
+        
+        """
+        Returns card taken from the top of the deck. Used by the Player Class. 
+        """
         
         for i in range(0,draw_size):
             return self.cards.pop(0)
@@ -180,10 +226,27 @@ class Deck:
         
     def count(self):
         
+        """
+        Prints a the number of cards in the deck: "The deck has {len(self.cards)} cards left"
+        """
+        
         print(f"The deck has {len(self.cards)} cards left")
     
         
     def deal(self,players,cards_per_player):
+        
+        """
+        Deals cards to a given list of players. User can specify how many cards each player recieves or the deal the max number of cards, i.e. Keep dealing until deck runs out.
+        
+        Parameters
+        ----------
+        players : List containing player objects
+            List of players to be dealt cards
+        cards_per_player: int or 'max'
+            Number of cards to be dealt to each player. Error will be thrown if cards_per_player*len(players) > 52
+            'max' will deal all cards in the deck until there are no cards left. Note this does not neccessarily mean each player will have an equal number of cards
+        
+        """
         
         if cards_per_player == 'max':
             
@@ -212,11 +275,20 @@ class Deck:
         
         
     def turn_up(self):
+        """
+        Takes top card from deck and moves to turn_up_card attribute
+
+        """
+        
         self.turn_up_card = self.cards.pop(0)
         print('The turn up card is', self.turn_up_card.return_show())
         
         
     def return_turn_up(self):
+        """
+        Moves turn_up_card attribute to the bottom of the deck
+
+        """
         self.cards.append(self.turn_up_card)
         self.turn_up_card=[]
         print('Turn up card has been returned to the deck')
