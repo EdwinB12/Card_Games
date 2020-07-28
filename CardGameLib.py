@@ -305,10 +305,40 @@ class Player:
         Cards currently in the players hand
     name: Str
         Player's Name
-    hc_hist
+    wins: int
+        Number of wins the player has over multiple games
+    rank: int
+        Postion in the game for the current round, i.e. in cribbage, if player has the most points they are rank 1. If they have the 2nd most points, they are 2nd, etc. Not all games will ustilise rank
+    rank_hist: List of ints
+        History of ranks for each round throughout a game 
+        
+    Methods
+    --------
+    play_card
+        Play a card from hand to a deck object. 
+    draw_hand
+        Draw cards from deck to hand
+    show_hand
+        Prints the contents of the players hand
+    discard_hand
+        Discard the players hand to a deck or generally discarded
+    count_hand
+        Prints number of the cards in the player's hand
+    update_win
+        adds 1 to wins attribute 
+    update_rank
+        adds rank to rank_hist
+    
     """
     
     def __init__(self,name):
+        
+        """
+        Parameters
+        ----------
+        name: Str
+            Player's Name
+        """
     
         self.hand=[] # List of Card Objects
         self.name=name # String name of the player
@@ -319,20 +349,44 @@ class Player:
     # ------------------------ Card Action Methods ------------------------
     
     def play_card(self,deck):
-        
-       card_played =[]
-       card_played = self.hand.pop(0)
-       deck.cards.append(card_played)
-       print(self.name, 'plays:', card_played.return_show())
+        """
+        Play a card from hand to a deck object. 
+
+        Parameters
+        ----------
+        deck : Deck Object
+            Deck to play the cards to. Often this deck would act as the table where all players play cards too. 
+
+        """
+        card_played =[]
+        card_played = self.hand.pop(0)
+        deck.cards.append(card_played)
+        print(self.name, 'plays:', card_played.return_show())
     
     # ------------------------ Hand Action Methods ------------------------
 
     def draw_hand(self,deck,draw_size=1):
         
+        """
+        Draw cards from deck to hand
+        
+        Parameters
+        ----------
+        deck: Deck Object
+            Deck to draw cards from to the players hand
+        draw_size: int, default =1
+            Number of cards to be drawn from the deck
+        """
+        
         for i in range(0,draw_size):
             self.hand.append(deck.draw(draw_size))
         
     def show_hand(self):
+        
+        """
+        Prints the contents of the players hand
+
+        """
         
         print(f'{self.name}''s hand contains:')
         # Loop through list of cards
@@ -340,6 +394,15 @@ class Player:
             card.show()
         
     def discard_hand(self,deck=None):
+        
+        """
+        Discard the players hand to a deck or generally discarded
+        
+        Parameters
+        -----------
+        deck: Deck Object, Default is None
+            If None,then hand is simply cleared. If deck is specified, then hand will be moved to the deck. 
+        """
         
         if deck == None:
             self.hand=[]
@@ -355,16 +418,25 @@ class Player:
         
     def count_hand(self):
         
+        """
+        Prints number of the cards in the player's hand
+        """
+        
         print(f"{self.name}'s hand has {len(self.hand)} cards")
         return len(self.hand)
     # ------------------ Update record (different metrics) methods -------------------------
         
-    
-        
     def update_win(self):
-         self.wins+=1
+        """
+        Adds 1 to wins attribute
+        """
+        self.wins+=1
     
     def update_rank(self):
+        '''
+        Adds rank to rank_hist
+
+        '''
         self.rank_hist.append(self.rank)
 
 
