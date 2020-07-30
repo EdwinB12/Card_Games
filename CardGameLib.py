@@ -32,7 +32,8 @@ import matplotlib.pyplot as plt
 from itertools import combinations
 import numpy as np
 import scipy.stats as ss
-
+import time
+from inputimeout import inputimeout, TimeoutOccurred
 
 
 class Card:
@@ -789,13 +790,52 @@ class Cribbage_Player(Player):
    
 class Cribbage():
     
+    """
+    Class governing game of Cribbage
+    
+    Attributes
+    ----------
+    players: List of Player Objects
+        List of the games players
+    deck: Deck Object
+        Deck being used
+    is_winner: bool
+        True when there is a winner of the game
+    
+    Methods
+    -------
+    record_ranks:
+        Calculate player ranks from the players scores
+    start_game:
+        Prepare deck and players for start of game
+    play_round:
+        Play round of cribbage
+    play_game:
+        Play game of cribbage
+    game_plots:
+        Plot statistics from the game
+    plot_win_hist:
+        Plot winning history of all players
+    """
+    
     def __init__(self,players):
+        
+        """
+        Parameters
+        ----------
+        players: List of Player Objects
+            List of the games players
+        """
         
         self.players = players # List of 'Cribbage_Player' classes
         self.deck = Deck() # Deck class
         self.is_winner = False
         
     def record_ranks(self):
+        
+        """
+        Calculate player ranks from the list of players scores for each round
+        """
         
         # Create a list of ranks 
         scores = np.array([player.game_score for player in self.players])
@@ -808,9 +848,7 @@ class Cribbage():
     
     def start_game(self):
         '''
-        Method to start a game of Cribbage:
-            Lists the players
-            Builds and Shuffles the Deck
+        Prepare deck and players for start of game. This includes building and shuffling the deck. 
 
         '''
         if len(self.players) > 4 or len(self.players) < 2:
@@ -837,7 +875,12 @@ class Cribbage():
     def play_round(self,score_target):
         
         '''
-        Play a game of Cribbage
+        Play round of cribbage
+        
+        Parameters
+        ----------
+        score_target: int
+            Target score for the game. 
         
         '''
         
@@ -941,6 +984,15 @@ class Cribbage():
            
     def play_game(self,target_score):
         
+        """
+        Play game of cribbage
+        
+        Parameters
+        ----------
+        score_target: int
+            Target score for the game. 
+        """
+        
         rnd = 1
         # Loop until a player reaches the target score
         while all(player.game_score < target_score for player in self.players):
@@ -965,6 +1017,15 @@ class Cribbage():
             
     def game_plots(self,line_colors):
         
+        """
+        Plot statistics from the game. Plot of the players game scores and rank throughout the game. 
+        
+        Parameters
+        ----------
+        line_colours: list 
+            List of colours for plotting lines. Must have the same length as the number of players. 
+        """
+        
         # Loop through players and supplied line
         fig,[ax1,ax2] = plt.subplots(2,figsize=(6,6))
         for player,line_color in zip(self.players,line_colors):
@@ -984,6 +1045,10 @@ class Cribbage():
         ax2.invert_yaxis()
     
     def plot_win_hist(self):
+        
+        '''
+        Plot win history of all players; I.e. how many games each player has won. Only useful when multiple games are played. 
+        '''
         
         # Plot win history if multiple games have been played
         fig,ax = plt.subplots(figsize=(6,6))
@@ -1067,7 +1132,7 @@ class Snap():
         deck_cnt=0
         card_cnt = 0
         
-     # Loop whilst there are more than 1 player
+        # Loop whilst there are more than 1 player
         while len(self.players) > 1:
             
             # Loop through the list of players
@@ -1112,6 +1177,79 @@ class Snap():
         print(f'The winner is {self.players[0].name} with {len(self.players[0].hand)} cards left!')
         print(f'Total number of cards played was {card_cnt}')   
         
+    def play_game_interactive(self,active_player):
+        
+        # Initliase counts
+        deck_cnt=0
+        card_cnt = 0
+        
+        # Loop whilst there are more than 1 player
+        while len(self.players) > 1:
+            
+            # Loop through the list of players
+            for index,player in enumerate(self.players):
+                
+                # Delay playing a card
+                time.sleep(0.5)
+                
+                player.update_hand_count() # records hand size for post game plots
+                
+                # Check if any player has no cards left. If not, then dlecare defeat and remove from player list
+                if player.declare_defeat():
+                    self.players.pop(index)
+                    continue
+                
+                # Play card onto playing deck (table) or quit game
+                if player == active_player:
+                    is_stop = input('Press enter to play card or type q to stop game:')
+                
+                    # Check if player wants to quit
+                    if is_stop == 'q':
+                        sys.exit('You have exited the game')
+                    else:
+                        pass
+                else:
+                    pass
+                
+                player.play_card(self.play_deck)
+                card_cnt+=1
+
+                
+                # If it is first card to be played, then it can't be snap so don't check for snap
+                if deck_cnt ==0:
+                    deck_cnt+=1
+                    
+                else:
+                    
+                    # Check if current card matches previous card
+                    if self.play_deck.cards[deck_cnt].num == self.play_deck.cards[deck_cnt-1].num:
+                        
+                        # Give user chance to call snap
+                        try:
+                            answer = inputimeout(prompt='Snap?',timeout = 5)
+                            print(answer)
+                        except TimeoutOccurred:
+                            print('Too Slow')
+                        
+                        
+                        
+                        
+                        # Calculate random winner of snap and set that players self.snap = True
+                        self.players[random.randint(0,len(self.players)-1)].snap = True
+                        deck_cnt=0
+                        
+                        # Loops through players to declare snap (random num has decided which player has self.snap=True)
+                        for player in self.players:
+                            player.declare_snap(self.play_deck)
+                        
+                    # If no snap, then continue
+                    else:
+                        deck_cnt+=1
+            
+        # Record player win incase multiple games are played
+        self.players[0].update_win()
+    
+    
     def plot_hand_count_hist(self,line_colors,title=None):
         
         # Plot win history if multiple games have been played
@@ -1134,3 +1272,40 @@ class Snap():
         ax.set_xlabel('Players')
         ax.set_ylabel('Wins')
         ax.set_title('Win Record')
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
