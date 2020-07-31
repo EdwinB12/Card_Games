@@ -786,8 +786,80 @@ class Cribbage_Player(Player):
         
         self.box_card = rejected_card
         
- 
-   
+    
+    def choose_hand_interactive(self,deck):
+        
+        # Show user their hand
+        self.show_hand()
+        
+        choose = input('Press y to choose your own hand, or any other key to let the computer pick the best scoring hand.')
+         
+        if choose == 'y':
+            rejected_card=[]
+            
+            # While there are more than 4 cards in their hand
+            while len(self.hand) > 4:
+            
+                # Ask user which card they want rejected
+                card_reject = input('Select a card you want to send to the box:')
+            
+                # Split string into parts
+                try:
+                    c_face,_,c_suit = card_reject.split(' ')
+                except ValueError:
+                    print('Card not accepted. The card must be written in the format "face of suit" as written above.')
+            
+                # Try converting face to int. If error then pass as a string correctly represents 'Ace', 'Jack' etc.
+                try:
+                    c_face = int(c_face)
+                except ValueError:
+                    pass
+            
+                # Search for card and send to box_card
+                card_exist = False
+                for card in self.hand:
+                    if card.suit == c_suit and card.face == c_face:
+                        # Remove from hand and save as rejected card list
+                        self.hand.remove(card)
+                        rejected_card.append(card) #This is appended incase multiple cards need to be thrown away
+                        print(f'You have discarded the {card.return_show()} to the box')
+                        card_exist = True
+                        break
+                    else:
+                        pass
+                
+                # If card has not be rejected, then the card did not exist in the players hand
+                if not card_exist:
+                    print(f'{card_reject} does not exist in your hand! Try Agin. \n')
+            
+            self.box_card = rejected_card
+                
+        else:
+            # Make a copy of the dealt hand
+            dealt_hand = self.hand.copy()
+                    
+            # Show user their hand
+            self.show_hand()
+            
+            # Make list of hand combinations and scores for each combination
+            hand_combinations = [comb for comb in combinations(dealt_hand,4)]
+            hand_scores = [self.calc_score(hand,deck,count_up=False) for hand in hand_combinations]
+            # Find index corresponding to highest scoring hand and pick combination as hand
+            best_index = np.argmax(hand_scores)
+            self.hand = list(hand_combinations[best_index])
+            
+            # Find rejected card 
+            rejected_card = list(set(dealt_hand) - set(self.hand.copy()))
+            
+            self.box_card = rejected_card
+        
+        
+        # Show hand at the end
+        print('\n')
+        self.show_hand()
+        print('\n')
+        
+       
 class Cribbage():
     
     """
@@ -818,7 +890,7 @@ class Cribbage():
         Plot winning history of all players
     """
     
-    def __init__(self,players):
+    def __init__(self,players=None):
         
         """
         Parameters
@@ -831,6 +903,29 @@ class Cribbage():
         self.deck = Deck() # Deck class
         self.is_winner = False
         
+        # If list of players have not been provided then prompt user for players 
+        if self.players == None:
+            
+            #initiliase name variable
+            name = ''
+            
+            # Ask user for their name
+            user_name = input('Enter your user name:')
+            active_player = Cribbage_Player(user_name)
+            self.players = [active_player]
+            
+            # Loop through a max of 3 more times asking for players
+            for i in range(0,3):
+                name = input('Enter automated opponents name or start:')
+                if name == 'start':
+                    break
+                else:
+                    self.players.append(Cribbage_Player(name))
+        
+        # Ask User if they would like to play Interactively? 
+        self.interactive = input('Would you like to play Interactively? Type "Yes" for yes or any other key for No.')
+        self.active_player = self.players[0] # Assign active player 
+                    
     def record_ranks(self):
         
         """
@@ -847,10 +942,12 @@ class Cribbage():
             player.update_rank()
     
     def start_game(self):
+        
         '''
         Prepare deck and players for start of game. This includes building and shuffling the deck. 
 
         '''
+        
         if len(self.players) > 4 or len(self.players) < 2:
             print(f'Cribbage cannot be played with {len(self.players)} players. Number of players must be 2,3 or 4.  ')
             sys.exit()
@@ -871,6 +968,7 @@ class Cribbage():
        
         print('Let the game begin!')
         print('\n')
+          
     
     def play_round(self,score_target):
         
@@ -906,7 +1004,12 @@ class Cribbage():
         
         # Loop through the players and discard unwanted cards to last players box
         for player in self.players:
-            player.choose_hand(self.deck)
+            
+            if player == self.active_player and self.interactive == 'Yes':
+                player.choose_hand_interactive(self.deck)
+            else:
+                player.choose_hand(self.deck)
+                
             self.players[-1].box.extend(player.box_card)
             player.box_card = []
             print(f'{player.name} has chosen their hand')
@@ -981,7 +1084,7 @@ class Cribbage():
         else:
             pass
         
-           
+         
     def play_game(self,target_score):
         
         """
@@ -1014,7 +1117,8 @@ class Cribbage():
         
         # Record Winning Player win
         winning_player.update_win()
-            
+        
+        
     def game_plots(self,line_colors):
         
         """
