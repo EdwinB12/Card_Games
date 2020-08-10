@@ -890,7 +890,7 @@ class Cribbage():
         Plot winning history of all players
     """
     
-    def __init__(self,players=None):
+    def __init__(self,players=None, interactive = None):
         
         """
         Parameters
@@ -923,7 +923,12 @@ class Cribbage():
                     self.players.append(Cribbage_Player(name))
         
         # Ask User if they would like to play Interactively? 
-        self.interactive = input('Would you like to play Interactively? Type "Yes" for yes or any other key for No.')
+        self.interactive = interactive
+        
+        if interactive == None:
+            self.interactive = input('Would you like to play Interactively? Type "Yes" for yes or any other key for No.')
+        
+            
         self.active_player = self.players[0] # Assign active player 
                     
     def record_ranks(self):
@@ -968,18 +973,11 @@ class Cribbage():
        
         print('Let the game begin!')
         print('\n')
-          
-    
-    def play_round(self,score_target):
+     
+    def deal(self):
         
         '''
-        Play round of cribbage
-        
-        Parameters
-        ----------
-        score_target: int
-            Target score for the game. 
-        
+        Deal cards to players in game.
         '''
         
         # -------------------- Dealing -------------------------
@@ -998,7 +996,21 @@ class Cribbage():
              self.players[-1].box.append(card_for_box)
         else:   
             # Deal 5 cards to each player
-             self.deck.deal(self.players,5)
+             self.deck.deal(self.players,5) 
+    
+    def play_round(self,score_target):
+        
+        '''
+        Play round of cribbage
+        
+        Parameters
+        ----------
+        score_target: int
+            Target score for the game. 
+        
+        '''
+        # Deal
+        self.deal()
             
         # ----------------- Hand Choosing ----------------------------
         

@@ -6,8 +6,7 @@ Created on Thu Jul 30 18:56:24 2020
 """
 
 import CardGameLib as CGL
-from itertools import combinations
-import numpy as np
+
 
                
 #%%
@@ -19,6 +18,7 @@ crib_game.start_game()
 crib_game.play_game(40)
 
 crib_game.game_plots(['y-','g-','r-','b-'])
+
 
 
 
